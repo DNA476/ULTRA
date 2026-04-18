@@ -408,4 +408,4 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 ```
 
-В dev-режиме media раздается через `ULTRA/urls.py`, если `DEBUG=True`.
+В dev-режиме media раздается через `ULTRA/urls.py`, если `DEBUG=True`. 
