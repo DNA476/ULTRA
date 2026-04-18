@@ -1,0 +1,104 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}{{ model_card }} | ULTRA Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <a class="text-muted text-decoration-none" href="{% url 'models_app:model_list' %}">← К списку моделей</a>
+        <h1 class="h3 mt-2 mb-1">{{ model_card }}</h1>
+        <p class="text-muted mb-0">{{ model_card.get_category_display }} · {{ model_card.get_status_display }}</p>
+    </div>
+    {% if can_edit_model %}
+        <div class="d-flex gap-2 align-items-start">
+            <a class="btn btn-outline-dark" href="{% url 'models_app:model_update' model_card.pk %}">Редактировать</a>
+            <a class="btn btn-outline-danger" href="{% url 'models_app:model_delete' model_card.pk %}">Удалить</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            {% if model_card.main_photo %}
+                <img src="{{ model_card.main_photo.url }}" class="card-img-top object-fit-cover" style="max-height: 520px;" alt="{{ model_card }}">
+            {% else %}
+                <div class="bg-secondary-subtle d-flex align-items-center justify-content-center text-muted" style="height: 420px;">
+                    Нет главного фото
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Основная информация</h2>
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Имя:</strong> {{ model_card.first_name }}</div>
+                    <div class="col-md-6"><strong>Фамилия:</strong> {{ model_card.last_name }}</div>
+                    <div class="col-md-6"><strong>Дата рождения:</strong> {{ model_card.birth_date|default:'Не указана' }}</div>
+                    <div class="col-md-6"><strong>Город:</strong> {{ model_card.city }}</div>
+                    <div class="col-md-6"><strong>Телефон:</strong> {{ model_card.phone }}</div>
+                    <div class="col-md-6"><strong>Email:</strong> {{ model_card.email|default:'Не указан' }}</div>
+                    <div class="col-md-6"><strong>Категория:</strong> {{ model_card.get_category_display }}</div>
+                    <div class="col-md-6"><strong>Статус:</strong> {{ model_card.get_status_display }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Параметры</h2>
+                <div class="row g-3">
+                    <div class="col-md-4"><strong>Рост:</strong> {{ model_card.height }} см</div>
+                    <div class="col-md-4"><strong>Грудь:</strong> {{ model_card.bust }} см</div>
+                    <div class="col-md-4"><strong>Талия:</strong> {{ model_card.waist }} см</div>
+                    <div class="col-md-4"><strong>Бедра:</strong> {{ model_card.hips }} см</div>
+                    <div class="col-md-4"><strong>Обувь:</strong> {{ model_card.shoe_size|default:'Не указано' }}</div>
+                    <div class="col-md-4"><strong>Волосы:</strong> {{ model_card.hair_color|default:'Не указано' }}</div>
+                    <div class="col-md-4"><strong>Глаза:</strong> {{ model_card.eye_color|default:'Не указано' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Опыт / описание</h2>
+                <p class="mb-0">{{ model_card.experience|linebreaksbr|default:'Описание пока не заполнено.' }}</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Служебная информация</h2>
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Добавлена:</strong> {{ model_card.created_at|date:'d.m.Y H:i' }}</div>
+                    <div class="col-md-6"><strong>Обновлена:</strong> {{ model_card.updated_at|date:'d.m.Y H:i' }}</div>
+                    <div class="col-md-6"><strong>Кем добавлена:</strong> {{ model_card.added_by|default:'Не указано' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-body">
+        <h2 class="h5 mb-3">Дополнительные фото</h2>
+        {% if model_card.photos.all %}
+            <div class="row g-3">
+                {% for photo in model_card.photos.all %}
+                    <div class="col-sm-6 col-lg-3">
+                        <img src="{{ photo.image.url }}" class="img-fluid rounded object-fit-cover w-100" style="height: 220px;" alt="{{ photo.caption|default:model_card }}">
+                        {% if photo.caption %}
+                            <p class="small text-muted mt-2 mb-0">{{ photo.caption }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted mb-0">Дополнительные фото пока не добавлены.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

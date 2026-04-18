@@ -1,0 +1,128 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Модели | ULTRA Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Модели</h1>
+        <p class="text-muted mb-0">Поиск, фильтрация и учет анкет моделей.</p>
+    </div>
+    {% if can_create_model %}
+        <div>
+            <a class="btn btn-dark" href="{% url 'models_app:model_create' %}">Добавить модель</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label" for="q">Поиск</label>
+                <input class="form-control" type="text" id="q" name="q" value="{{ request.GET.q }}" placeholder="Имя, фамилия, телефон, email">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="category">Категория</label>
+                <select class="form-select" id="category" name="category">
+                    <option value="">Все</option>
+                    {% for value, label in category_choices %}
+                        <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="status">Статус</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">Все</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="height_min">Рост от</label>
+                <input class="form-control" type="number" id="height_min" name="height_min" value="{{ request.GET.height_min }}" min="120" max="230">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" for="height_max">Рост до</label>
+                <input class="form-control" type="number" id="height_max" name="height_max" value="{{ request.GET.height_max }}" min="120" max="230">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="has_experience">Опыт</label>
+                <select class="form-select" id="has_experience" name="has_experience">
+                    <option value="">Не важно</option>
+                    <option value="yes" {% if request.GET.has_experience == 'yes' %}selected{% endif %}>Есть опыт</option>
+                    <option value="no" {% if request.GET.has_experience == 'no' %}selected{% endif %}>Без опыта</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" for="sort">Сортировка</label>
+                <select class="form-select" id="sort" name="sort">
+                    <option value="name" {% if request.GET.sort == 'name' or not request.GET.sort %}selected{% endif %}>Имя А-Я</option>
+                    <option value="-name" {% if request.GET.sort == '-name' %}selected{% endif %}>Имя Я-А</option>
+                    <option value="-created" {% if request.GET.sort == '-created' %}selected{% endif %}>Новые сначала</option>
+                    <option value="created" {% if request.GET.sort == 'created' %}selected{% endif %}>Старые сначала</option>
+                </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end gap-2">
+                <button class="btn btn-dark" type="submit">Применить</button>
+                <a class="btn btn-outline-secondary" href="{% url 'models_app:model_list' %}">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if models %}
+    <div class="row g-4">
+        {% for model_card in models %}
+            <div class="col-md-6 col-xl-4">
+                <div class="card border-0 shadow-sm h-100">
+                    {% if model_card.main_photo %}
+                        <img src="{{ model_card.main_photo.url }}" class="card-img-top object-fit-cover" style="height: 280px;" alt="{{ model_card }}">
+                    {% else %}
+                        <div class="bg-secondary-subtle d-flex align-items-center justify-content-center text-muted" style="height: 280px;">
+                            Нет главного фото
+                        </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between gap-2 mb-2">
+                            <h2 class="h5 mb-0">{{ model_card }}</h2>
+                            <span class="badge text-bg-light">{{ model_card.get_status_display }}</span>
+                        </div>
+                        <p class="text-muted mb-2">{{ model_card.city }} · {{ model_card.height }} см · {{ model_card.get_category_display }}</p>
+                        <p class="small mb-0">{{ model_card.phone }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 pt-0">
+                        <a class="btn btn-outline-dark btn-sm" href="{% url 'models_app:model_detail' model_card.pk %}">Открыть</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+        <nav class="mt-4" aria-label="Пагинация">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?{{ current_filters.urlencode }}&page={{ page_obj.previous_page_number }}">Назад</a></li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?{{ current_filters.urlencode }}&page={{ page_obj.next_page_number }}">Вперед</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <h2 class="h5">Анкеты не найдены</h2>
+            <p class="text-muted mb-3">Измените фильтры или добавьте первую модель.</p>
+            {% if can_create_model %}
+                <a class="btn btn-dark" href="{% url 'models_app:model_create' %}">Добавить модель</a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

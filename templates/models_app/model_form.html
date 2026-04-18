@@ -1,0 +1,45 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}{% if model_card %}Редактирование модели{% else %}Новая модель{% endif %} | ULTRA Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <a class="text-muted text-decoration-none" href="{% url 'models_app:model_list' %}">← К списку моделей</a>
+        <h1 class="h3 mt-2 mb-1">{% if model_card %}Редактирование модели{% else %}Новая модель{% endif %}</h1>
+        <p class="text-muted mb-0">Заполните анкету и сохраните изменения.</p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="row g-3">
+                {% for field in form %}
+                    <div class="col-md-{% if field.name == 'experience' %}12{% else %}6{% endif %}">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button class="btn btn-dark" type="submit">Сохранить</button>
+                <a class="btn btn-outline-secondary" href="{% if model_card %}{% url 'models_app:model_detail' model_card.pk %}{% else %}{% url 'models_app:model_list' %}{% endif %}">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

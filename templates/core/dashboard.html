@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | ULTRA Agency{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-3">Dashboard</h1>
+                <p class="text-muted mb-0">
+                    Базовая страница панели управления агентства. На следующих этапах здесь появятся
+                    метрики по моделям, проектам, сотрудникам и выручке.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mt-3 mt-lg-0">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h5">Навигация</h2>
+                <p class="text-muted mb-0">
+                    Разделы меню подключены как заглушки и будут активированы по мере реализации CRUD.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
