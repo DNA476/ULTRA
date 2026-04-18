@@ -3,25 +3,125 @@
 {% block title %}Dashboard | ULTRA Agency{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="h3 mb-3">Dashboard</h1>
-                <p class="text-muted mb-0">
-                    Базовая страница панели управления агентства. На следующих этапах здесь появятся
-                    метрики по моделям, проектам, сотрудникам и выручке.
-                </p>
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Dashboard</h1>
+        <p class="text-muted mb-0">Оперативная сводка по моделям, проектам и сотрудникам.</p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Всего моделей</div>
+                <div class="display-6 fw-semibold">{{ total_models }}</div>
+                <a class="small text-decoration-none" href="{% url 'models_app:model_list' %}">Открыть базу</a>
             </div>
         </div>
     </div>
-    <div class="col-lg-4 mt-3 mt-lg-0">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h2 class="h5">Навигация</h2>
-                <p class="text-muted mb-0">
-                    Разделы меню подключены как заглушки и будут активированы по мере реализации CRUD.
-                </p>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Активные модели</div>
+                <div class="display-6 fw-semibold">{{ active_models }}</div>
+                <span class="small text-muted">В архиве: {{ archived_models }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-1">На контракте</div>
+                <div class="display-6 fw-semibold">{{ contract_models }}</div>
+                <span class="small text-muted">Статус модели</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Открытые проекты</div>
+                <div class="display-6 fw-semibold">{{ open_projects }}</div>
+                <a class="small text-decoration-none" href="{% url 'projects:project_list' %}">Открыть проекты</a>
+            </div>
+        </div>
+    </div>
+    {% if can_view_revenue %}
+        <div class="col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">Выручка за месяц</div>
+                    <div class="display-6 fw-semibold">{{ current_month_revenue }}</div>
+                    <span class="small text-muted">Завершенные проекты</span>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <div class="col-sm-6 col-xl-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small mb-1">Активные сотрудники</div>
+                <div class="display-6 fw-semibold">{{ employees_count }}</div>
+                {% if can_manage_employees %}
+                    <a class="small text-decoration-none" href="{% url 'employees:employee_list' %}">Открыть раздел</a>
+                {% else %}
+                    <span class="small text-muted">Кадровый учет</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 mb-0">Последние модели</h2>
+                    <a class="btn btn-outline-dark btn-sm" href="{% url 'models_app:model_list' %}">Все модели</a>
+                </div>
+                {% if latest_models %}
+                    <div class="list-group list-group-flush">
+                        {% for model_card in latest_models %}
+                            <a class="list-group-item list-group-item-action px-0" href="{% url 'models_app:model_detail' model_card.pk %}">
+                                <div class="d-flex justify-content-between gap-3">
+                                    <span>{{ model_card }}</span>
+                                    <span class="badge text-bg-light">{{ model_card.get_status_display }}</span>
+                                </div>
+                                <div class="small text-muted">{{ model_card.city }} · {{ model_card.created_at|date:'d.m.Y H:i' }}</div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Анкеты моделей пока не добавлены.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 mb-0">Последние проекты</h2>
+                    <a class="btn btn-outline-dark btn-sm" href="{% url 'projects:project_list' %}">Все проекты</a>
+                </div>
+                {% if latest_projects %}
+                    <div class="list-group list-group-flush">
+                        {% for project in latest_projects %}
+                            <a class="list-group-item list-group-item-action px-0" href="{% url 'projects:project_detail' project.pk %}">
+                                <div class="d-flex justify-content-between gap-3">
+                                    <span>{{ project.title }}</span>
+                                    <span class="badge text-bg-light">{{ project.get_status_display }}</span>
+                                </div>
+                                <div class="small text-muted">{{ project.client.name }} · {{ project.start_date|date:'d.m.Y' }}</div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Проекты пока не добавлены.</p>
+                {% endif %}
             </div>
         </div>
     </div>

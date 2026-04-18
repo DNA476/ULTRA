@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ project.title }} | ULTRA Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <a class="text-muted text-decoration-none" href="{% url 'projects:project_list' %}">← К списку проектов</a>
+        <h1 class="h3 mt-2 mb-1">{{ project.title }}</h1>
+        <p class="text-muted mb-0">{{ project.get_project_type_display }} · {{ project.get_status_display }}</p>
+    </div>
+    {% if can_manage_projects %}
+        <div class="d-flex gap-2 align-items-start">
+            <a class="btn btn-outline-dark" href="{% url 'projects:project_update' project.pk %}">Редактировать</a>
+            <a class="btn btn-outline-danger" href="{% url 'projects:project_delete' project.pk %}">Удалить</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Данные проекта</h2>
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Заказчик:</strong> <a href="{% url 'clients:client_detail' project.client.pk %}">{{ project.client.name }}</a></div>
+                    <div class="col-md-6"><strong>Тип:</strong> {{ project.get_project_type_display }}</div>
+                    <div class="col-md-6"><strong>Статус:</strong> {{ project.get_status_display }}</div>
+                    <div class="col-md-6"><strong>Ответственный:</strong> {{ project.responsible_employee|default:'Не назначен' }}</div>
+                    <div class="col-md-6"><strong>Дата начала:</strong> {{ project.start_date|date:'d.m.Y' }}</div>
+                    <div class="col-md-6"><strong>Дата окончания:</strong> {{ project.end_date|date:'d.m.Y'|default:'Не указана' }}</div>
+                    <div class="col-md-6"><strong>Бюджет / выручка:</strong> {{ project.budget }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Описание</h2>
+                <p class="mb-0">{{ project.description|linebreaksbr|default:'Описание пока не заполнено.' }}</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Заметки</h2>
+                <p class="mb-0">{{ project.notes|linebreaksbr|default:'Заметки пока не заполнены.' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Заказчик</h2>
+                <div class="vstack gap-2">
+                    <div><strong>Название:</strong> {{ project.client.name }}</div>
+                    <div><strong>Контакт:</strong> {{ project.client.contact_person|default:'Не указан' }}</div>
+                    <div><strong>Телефон:</strong> {{ project.client.phone|default:'Не указан' }}</div>
+                    <div><strong>Email:</strong> {{ project.client.email|default:'Не указан' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Назначенные модели</h2>
+                {% if project.participations.all %}
+                    <div class="list-group list-group-flush">
+                        {% for participation in project.participations.all %}
+                            <a class="list-group-item list-group-item-action px-0" href="{% url 'models_app:model_detail' participation.model.pk %}">
+                                <div class="d-flex justify-content-between gap-3">
+                                    <span>{{ participation.model }}</span>
+                                    <span class="badge text-bg-light">{{ participation.get_status_display }}</span>
+                                </div>
+                                {% if participation.comment %}
+                                    <div class="small text-muted">{{ participation.comment }}</div>
+                                {% endif %}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Модели пока не назначены.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if can_manage_projects %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Добавить модель</h2>
+                    <form method="post" action="{% url 'projects:participation_create' project.pk %}" novalidate>
+                        {% csrf_token %}
+                        {% for field in participation_form %}
+                            {% if field.is_hidden %}
+                                {{ field }}
+                            {% else %}
+                                <div class="mb-3">
+                                    <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% for error in field.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <button class="btn btn-dark" type="submit">Назначить</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Заказчики | ULTRA Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Заказчики</h1>
+        <p class="text-muted mb-0">База клиентов агентства и история проектов.</p>
+    </div>
+    {% if can_manage_clients %}
+        <div>
+            <a class="btn btn-dark" href="{% url 'clients:client_create' %}">Добавить заказчика</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label" for="q">Поиск</label>
+                <input class="form-control" type="text" id="q" name="q" value="{{ request.GET.q }}" placeholder="Название, контактное лицо, телефон, email, город">
+            </div>
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button class="btn btn-dark" type="submit">Найти</button>
+                <a class="btn btn-outline-secondary" href="{% url 'clients:client_list' %}">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if clients %}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>Заказчик</th>
+                    <th>Контакт</th>
+                    <th>Город</th>
+                    <th>Проекты</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for client in clients %}
+                    <tr>
+                        <td>
+                            <strong>{{ client.name }}</strong>
+                            <div class="small text-muted">{{ client.email|default:'Email не указан' }}</div>
+                        </td>
+                        <td>
+                            {{ client.contact_person|default:'Не указано' }}
+                            <div class="small text-muted">{{ client.phone|default:'Телефон не указан' }}</div>
+                        </td>
+                        <td>{{ client.city|default:'Не указан' }}</td>
+                        <td>{{ client.projects.count }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-outline-dark btn-sm" href="{% url 'clients:client_detail' client.pk %}">Открыть</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if is_paginated %}
+        <nav class="mt-4" aria-label="Пагинация">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?{{ current_filters.urlencode }}&page={{ page_obj.previous_page_number }}">Назад</a></li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?{{ current_filters.urlencode }}&page={{ page_obj.next_page_number }}">Вперед</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <h2 class="h5">Заказчики не найдены</h2>
+            <p class="text-muted mb-3">Измените поиск или добавьте первого заказчика.</p>
+            {% if can_manage_clients %}
+                <a class="btn btn-dark" href="{% url 'clients:client_create' %}">Добавить заказчика</a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

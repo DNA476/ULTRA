@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Сотрудники | ULTRA Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <h1 class="h3 mb-1">Сотрудники</h1>
+        <p class="text-muted mb-0">Кадровый учет, роли и активность сотрудников агентства.</p>
+    </div>
+</div>
+
+{% if employees %}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>Сотрудник</th>
+                    <th>Роль</th>
+                    <th>Телефон</th>
+                    <th>Email</th>
+                    <th>Дата приема</th>
+                    <th>Активность</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for employee in employees %}
+                    <tr>
+                        <td>
+                            <strong>{{ employee }}</strong>
+                            <div class="small text-muted">{{ employee.user.username }}</div>
+                        </td>
+                        <td>{{ employee.get_role_display }}</td>
+                        <td>{{ employee.phone|default:'Не указан' }}</td>
+                        <td>{{ employee.user.email|default:'Не указан' }}</td>
+                        <td>{{ employee.hire_date|date:'d.m.Y'|default:'Не указана' }}</td>
+                        <td>
+                            {% if employee.is_active and employee.user.is_active %}
+                                <span class="badge text-bg-success">Активен</span>
+                            {% else %}
+                                <span class="badge text-bg-secondary">Неактивен</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-outline-dark btn-sm" href="{% url 'employees:employee_detail' employee.pk %}">Открыть</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if is_paginated %}
+        <nav class="mt-4" aria-label="Пагинация">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a></li>
+                {% endif %}
+                <li class="page-item active"><span class="page-link">{{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперед</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <h2 class="h5">Сотрудники не найдены</h2>
+            <p class="text-muted mb-0">Создайте пользователей и профили сотрудников через Django admin.</p>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ client.name }} | ULTRA Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <a class="text-muted text-decoration-none" href="{% url 'clients:client_list' %}">← К списку заказчиков</a>
+        <h1 class="h3 mt-2 mb-1">{{ client.name }}</h1>
+        <p class="text-muted mb-0">{{ client.city|default:'Город не указан' }}</p>
+    </div>
+    {% if can_manage_clients %}
+        <div class="d-flex gap-2 align-items-start">
+            <a class="btn btn-outline-dark" href="{% url 'clients:client_update' client.pk %}">Редактировать</a>
+            <a class="btn btn-outline-danger" href="{% url 'clients:client_delete' client.pk %}">Удалить</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Контакты</h2>
+                <div class="vstack gap-2">
+                    <div><strong>Контактное лицо:</strong> {{ client.contact_person|default:'Не указано' }}</div>
+                    <div><strong>Телефон:</strong> {{ client.phone|default:'Не указан' }}</div>
+                    <div><strong>Email:</strong> {{ client.email|default:'Не указан' }}</div>
+                    <div><strong>Город:</strong> {{ client.city|default:'Не указан' }}</div>
+                    <div><strong>Добавлен:</strong> {{ client.created_at|date:'d.m.Y H:i' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Заметки</h2>
+                <p class="mb-0">{{ client.notes|linebreaksbr|default:'Заметки пока не заполнены.' }}</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 mb-0">Проекты заказчика</h2>
+                    {% if can_manage_clients %}
+                        <a class="btn btn-outline-dark btn-sm" href="{% url 'projects:project_create' %}">Новый проект</a>
+                    {% endif %}
+                </div>
+                {% if client.projects.all %}
+                    <div class="list-group list-group-flush">
+                        {% for project in client.projects.all %}
+                            <a class="list-group-item list-group-item-action px-0" href="{% url 'projects:project_detail' project.pk %}">
+                                <div class="d-flex justify-content-between gap-3">
+                                    <span>{{ project.title }}</span>
+                                    <span class="badge text-bg-light">{{ project.get_status_display }}</span>
+                                </div>
+                                <div class="small text-muted">{{ project.start_date|date:'d.m.Y' }} · {{ project.get_project_type_display }}</div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Проектов пока нет.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

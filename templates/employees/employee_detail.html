@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ employee }} | ULTRA Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+    <div>
+        <a class="text-muted text-decoration-none" href="{% url 'employees:employee_list' %}">← К списку сотрудников</a>
+        <h1 class="h3 mt-2 mb-1">{{ employee }}</h1>
+        <p class="text-muted mb-0">{{ employee.get_role_display }}</p>
+    </div>
+    <div>
+        {% if employee.is_active and employee.user.is_active %}
+            <span class="badge text-bg-success">Активен</span>
+        {% else %}
+            <span class="badge text-bg-secondary">Неактивен</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Профиль</h2>
+                <div class="vstack gap-2">
+                    <div><strong>Пользователь:</strong> {{ employee.user.username }}</div>
+                    <div><strong>Имя:</strong> {{ employee.user.first_name|default:'Не указано' }}</div>
+                    <div><strong>Фамилия:</strong> {{ employee.user.last_name|default:'Не указана' }}</div>
+                    <div><strong>Роль:</strong> {{ employee.get_role_display }}</div>
+                    <div><strong>Телефон:</strong> {{ employee.phone|default:'Не указан' }}</div>
+                    <div><strong>Email:</strong> {{ employee.user.email|default:'Не указан' }}</div>
+                    <div><strong>Дата приема:</strong> {{ employee.hire_date|date:'d.m.Y'|default:'Не указана' }}</div>
+                    <div><strong>Активность пользователя:</strong> {{ employee.user.is_active|yesno:'активен,неактивен' }}</div>
+                    <div><strong>Активность профиля:</strong> {{ employee.is_active|yesno:'активен,неактивен' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Заметки</h2>
+                <p class="mb-0">{{ employee.notes|linebreaksbr|default:'Заметки пока не заполнены.' }}</p>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Проекты в ответственности</h2>
+                {% if employee.projects.all %}
+                    <div class="list-group list-group-flush">
+                        {% for project in employee.projects.all %}
+                            <a class="list-group-item list-group-item-action px-0" href="{% url 'projects:project_detail' project.pk %}">
+                                <div class="d-flex justify-content-between gap-3">
+                                    <span>{{ project.title }}</span>
+                                    <span class="badge text-bg-light">{{ project.get_status_display }}</span>
+                                </div>
+                                <div class="small text-muted">{{ project.start_date|date:'d.m.Y' }} · {{ project.client.name }}</div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Сотрудник пока не назначен ответственным по проектам.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
